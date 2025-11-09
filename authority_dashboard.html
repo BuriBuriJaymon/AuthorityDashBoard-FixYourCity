@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authority Dashboard - Fix YourCity</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Load Heroicons for icons -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/heroicons@2.1.1/24/outline/index.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Style for the active sidebar link */
+        .sidebar-link.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+        }
+
+        /* Custom scrollbar for complaint list */
+        #complaint-list {
+            max-height: calc(100vh - 300px); /* Adjust height as needed */
+            overflow-y: auto;
+        }
+
+        /* Small screen sidebar toggle */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="h-full">
+    <div class="min-h-full">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar fixed inset-y-0 left-0 z-30 flex w-64 flex-col overflow-y-auto bg-gray-800 px-6 pb-4 md:flex md:transform-none">
+            <div class="flex h-16 shrink-0 items-center">
+                <h1 class="text-2xl font-bold text-white">Fix YourCity</h1>
+            </div>
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                <!-- Dashboard & Priority Links -->
+                <li>
+                    <ul role="list" class="-mx-2 space-y-1">
+                        <li>
+                            <a href="#" class="sidebar-link active" data-filter="All Reports">
+                                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.44 1.15-.44 1.59 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                </svg>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-link" data-filter="High Priority">
+                                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                </svg>
+                                High Priority
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Category Filter Links -->
+                <li>
+                    <div class="text-xs font-semibold leading-6 text-gray-400">Categories</div>
+                    <ul role="list" class="-mx-2 mt-2 space-y-1" id="category-filters">
+                        <!-- Categories from the user-facing site -->
+                        <li><a href="#" class="sidebar-link" data-filter="Potholes">Potholes</a></li>
+                        <li><a href="#" class="sidebar-link" data-filter="Broken Streetlight">Broken Streetlight</a></li>
+                        <li><a href="#" class="sidebar-link" data-filter="Garbage Overflow">Garbage Overflow</a></li>
+                        <li><a href="#" class="sidebar-link" data-filter="Illegal Parking">Illegal Parking</a></li>
+                        <li><a href="#" class="sidebar-link" data-filter="Public Nuisance">Public Nuisance</a></li>
+<li><a href="#" class="sidebar-link" data-filter="Others">Others</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="md:pl-64">
+            <!-- Header Bar -->
+            <div class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                <!-- Mobile Menu Toggle -->
+                <button type_button" class="text-gray-700 md:hidden" id="menu-toggle">
+                    <span class="sr-only">Open sidebar</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
+                <div class="flex-1 text-sm font-medium leading-6 text-gray-900" id="header-title">Dashboard</div>
+            </div>
+
+            <!-- Main Dashboard -->
+            <main class="py-10">
+                <div class="px-4 sm:px-6 lg:px-8">
+                    <!-- Statistics Cards -->
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">Key Statistics</h3>
+                    <div class="mt-2 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        <!-- Total Reports Card -->
+                        <div class="overflow-hidden rounded-lg bg-white shadow">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="truncate text-sm font-medium text-gray-500">Total Reports</dt>
+                                            <dd class="text-3xl font-semibold tracking-tight text-gray-900" id="stat-total">0</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Pending Reports Card -->
+                        <div class="overflow-hidden rounded-lg bg-white shadow">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="truncate text-sm font-medium text-gray-500">Pending</dt>
+                                            <dd class="text-3xl font-semibold tracking-tight text-gray-900" id="stat-pending">0</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- High Priority Card -->
+                        <div class="overflow-hidden rounded-lg bg-red-100 shadow">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="truncate text-sm font-medium text-red-700">High Priority</dt>
+                                            <dd class="text-3xl font-semibold tracking-tight text-red-900" id="stat-priority">0</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complaint List Section -->
+                    <div class="mt-8">
+                        <h2 class="text-xl font-semibold leading-6 text-gray-900" id="complaint-list-title">All Reports</h2>
+                        <div class="mt-4 overflow-hidden rounded-lg bg-white shadow">
+                            <div class="p-6 space-y-6" id="complaint-list">
+                                <!-- Complaint cards will be injected here by JavaScript -->
+                                <div id="empty-state" class="text-center text-gray-500 py-10">
+                                    <p>No reports found matching this filter.</p>
+                                    <p class="text-sm mt-2">Try submitting a report on the user dashboard.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let allReports = [];
+            let currentFilter = 'All Reports';
+
+            const statTotalEl = document.getElementById('stat-total');
+            const statPendingEl = document.getElementById('stat-pending');
+            const statPriorityEl = document.getElementById('stat-priority');
+            const complaintListEl = document.getElementById('complaint-list');
+            const emptyStateEl = document.getElementById('empty-state');
+            const headerTitleEl = document.getElementById('header-title');
+            const complaintListTitleEl = document.getElementById('complaint-list-title');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const categoryFiltersEl = document.getElementById('category-filters');
+
+            // --- Mobile Sidebar Toggle ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // --- Core Functions ---
+
+            /**
+             * Loads all reports from localStorage, updates state, and re-renders.
+             * This is the main function to refresh the UI.
+             */
+            function loadAndRenderReports() {
+                const reportsJSON = localStorage.getItem('reports');
+                allReports = reportsJSON ? JSON.parse(reportsJSON) : [];
+                
+                console.log(`Loaded ${allReports.length} reports from localStorage.`);
+                
+                updateStatistics();
+                renderComplaintList();
+            }
+
+            /**
+             * Saves the current `allReports` array back to localStorage.
+             */
+            function saveReports() {
+                localStorage.setItem('reports', JSON.stringify(allReports));
+            }
+
+            /**
+             * Checks if a report is "High Priority"
+             * (Older than 5 days and still "Pending").
+             */
+            function isHighPriority(report) {
+                if (report.status !== 'Pending') {
+                    return false;
+                }
+                const reportDate = new Date(report.date);
+                const now = new Date();
+                const diffTime = Math.abs(now - reportDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays > 5;
+            }
+
+            /**
+             * Updates the top statistic cards.
+             */
+            function updateStatistics() {
+                const total = allReports.length;
+                const pending = allReports.filter(r => r.status === 'Pending').length;
+                const priority = allReports.filter(isHighPriority).length;
+
+                statTotalEl.textContent = total;
+                statPendingEl.textContent = pending;
+                statPriorityEl.textContent = priority;
+            }
+
+            /**
+             * Renders the list of complaint cards based on the current filter.
+             */
+            function renderComplaintList() {
+                // Clear the list
+                complaintListEl.innerHTML = '';
+
+                // Get filtered reports
+                let filteredReports = [];
+                if (currentFilter === 'All Reports') {
+                    filteredReports = allReports;
+                } else if (currentFilter === 'High Priority') {
+                    filteredReports = allReports.filter(isHighPriority);
+                } else {
+                    // Category filter
+                    filteredReports = allReports.filter(r => r.type === currentFilter);
+                }
+
+                // Sort by date, newest first
+                filteredReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Display empty state or render cards
+                if (filteredReports.length === 0) {
+                    complaintListEl.appendChild(emptyStateEl);
+                } else {
+                    filteredReports.forEach(report => {
+                        const card = createComplaintCard(report);
+                        complaintListEl.appendChild(card);
+                    });
+                }
+            }
+
+            /**
+             * Creates a single HTML element for a complaint card.
+             */
+            function createComplaintCard(report) {
+                const card = document.createElement('div');
+                card.className = 'p-6 border-b border-gray-200 last:border-b-0';
+                
+                const highPriority = isHighPriority(report);
+                const reportDate = new Date(report.date);
+                const formattedDate = reportDate.toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                let statusBadge = '';
+                if (report.status === 'Pending') {
+                    statusBadge = `<span class="inline-flex items-center rounded-md bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">Pending</span>`;
+                } else if (report.status === 'In Progress') {
+                    statusBadge = `<span class="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">In Progress</span>`;
+                } else if (report.status === 'Resolved') {
+                    statusBadge = `<span class="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-800">Resolved</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-x-3">
+                            <span class="font-semibold text-gray-800">${report.type}</span>
+                            ${statusBadge}
+                            ${highPriority ? `<span class="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-800 shadow-sm">HIGH PRIORITY</span>` : ''}
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            Reported on: ${formattedDate}
+                        </div>
+                    </div>
+                    
+                    <p class="mt-4 text-gray-700">${report.description || 'No description provided.'}</p>
+                    
+                    <div class="mt-4 flex items-center justify-between">
+                        <!-- Location and User Info -->
+                        <div class="text-sm text-gray-600">
+                            <p><strong>Location:</strong> ${report.location || 'Not specified'}</p>
+                            <p class="mt-1"><strong>Citizen ID:</strong> <span class="font-mono text-xs">${report.userId || 'anonymous'}</span></p>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex-shrink-0 space-x-2">
+                            ${report.status === 'Pending' ? `
+                                <button data-id="${report.id}" data-status="In Progress" class="status-btn rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                    Mark In Progress
+                                </button>` 
+                            : ''}
+                            ${report.status === 'In Progress' || report.status === 'Pending' ? `
+                                <button data-id="${report.id}" data-status="Resolved" class="status-btn rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
+                                    Mark Resolved
+                                </button>` 
+                            : ''}
+                        </div>
+                    </div>
+                `;
+                return card;
+            }
+
+            // --- Event Handlers ---
+
+            /**
+             * Handles clicks on the sidebar filter links.
+             */
+            function handleFilterClick(e) {
+                e.preventDefault();
+                const target = e.currentTarget;
+                currentFilter = target.dataset.filter;
+
+                // Update header titles
+                const title = currentFilter === 'All Reports' ? 'Dashboard' : currentFilter;
+                headerTitleEl.textContent = title;
+                complaintListTitleEl.textContent = `${currentFilter} Reports`;
+
+                // Update active link
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                target.classList.add('active');
+
+                // Re-render the list
+                renderComplaintList();
+                
+                // Close sidebar on mobile after clicking a link
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('open');
+                }
+            }
+
+            /**
+             * Handles clicks on the "Mark In Progress" or "Mark Resolved" buttons.
+             */
+            function handleStatusChange(e) {
+                if (!e.target.classList.contains('status-btn')) {
+                    return; // Not a status button
+                }
+
+                const reportId = e.target.dataset.id;
+                const newStatus = e.target.dataset.status;
+
+                // Find and update the report in the global state
+                const reportIndex = allReports.findIndex(r => r.id === reportId);
+                if (reportIndex > -1) {
+                    allReports[reportIndex].status = newStatus;
+                    console.log(`Updated report ${reportId} to status ${newStatus}`);
+                    
+                    // Save changes and re-render everything
+                    saveReports();
+                    loadAndRenderReports();
+                }
+            }
+
+            /**
+             * Listens for changes to localStorage from *other* tabs/windows.
+             * This makes the dashboard update in real-time when a user submits a new report.
+             */
+            function handleStorageChange(e) {
+                if (e.key === 'reports') {
+                    console.log('Storage change detected. Reloading reports...');
+                    loadAndRenderReports();
+                }
+            }
+
+            // --- Initialization ---
+
+            // Attach event listeners
+            sidebarLinks.forEach(link => link.addEventListener('click', handleFilterClick));
+            complaintListEl.addEventListener('click', handleStatusChange);
+            window.addEventListener('storage', handleStorageChange);
+
+            // Initial load
+            loadAndRenderReports();
+        });
+    </script>
+</body>
+</html>
