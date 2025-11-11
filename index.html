@@ -15,11 +15,36 @@
             font-family: 'Inter', sans-serif;
         }
         
+        /* === MODIFIED/ADDED STYLES START === */
+
+        /* Base style for all sidebar links */
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* 12px */
+            padding: 0.5rem 0.75rem; /* py-2 px-3 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            color: #c7d2fe; /* text-indigo-200 (soft blue) */
+            transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+            text-decoration: none; /* Remove default underline */
+        }
+
+        /* Hover state for all links */
+        .sidebar-link:hover {
+            background-color: #4338ca; /* bg-indigo-700 */
+            color: #ffffff; /* text-white */
+        }
+        
         /* Style for the active sidebar link */
         .sidebar-link.active {
-            background-color: #46e553; 
-            color: light red;
+            background-color: #4338ca; /* bg-indigo-700 */
+            color: #ffffff; /* text-white */
         }
+
+        /* === MODIFIED/ADDED STYLES END === */
+
 
         /* Custom scrollbar for complaint list */
         #complaint-list {
