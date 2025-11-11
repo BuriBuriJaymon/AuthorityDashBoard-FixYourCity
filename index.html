@@ -1,1317 +1,653 @@
 <!DOCTYPE html>
-
 <html lang="en" class="h-full bg-gray-100">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Authority Dashboard - Fix YourCity</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <script type="module" src="https://cdn.jsdelivr.net/npm/heroicons@2.1.1/24/outline/index.min.js"></script>
 
-
-
     <style>
-
         body {
-
             font-family: 'Inter', sans-serif;
-
         }
-
-
-
-        /* === ADDED STYLE === */
-
         /* Utility class to hide elements */
-
         .hidden {
-
             display: none;
-
         }
-
-        /* === END ADDED STYLE === */
-
-
-
-        /* === MODIFIED/ADDED STYLES START === */
-
-
-
         /* Base style for all sidebar links */
-
         .sidebar-link {
-
             display: flex;
-
             align-items: center;
-
             gap: 0.75rem; /* 12px */
-
             padding: 0.5rem 0.75rem; /* py-2 px-3 */
-
             border-radius: 0.375rem; /* rounded-md */
-
             font-size: 0.875rem; /* text-sm */
-
             font-weight: 500; /* font-medium */
-
             color: #d1fae5; /* Lighter green text color for contrast on green bg */
-
             transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
-
             text-decoration: none; /* Remove default underline */
-
         }
-
-
-
         /* Hover state for all links */
-
         .sidebar-link:hover {
-
             background-color: #34d399; /* bg-emerald-400 - slightly darker hover */
-
             color: #ffffff; /* text-white */
-
         }
-
         
-
         /* Style for the active sidebar link */
-
         .sidebar-link.active {
-
             background-color: #34d399; /* bg-emerald-400 - slightly darker active */
-
             color: #ffffff; /* text-white */
-
         }
-
-
-
-        /* === MODIFIED/ADDED STYLES END === */
-
-
-
-
-
         /* Custom scrollbar for complaint list */
-
         #complaint-list {
-
             max-height: calc(100vh - 300px); /* Adjust height as needed */
-
             overflow-y: auto;
-
         }
-
-
-
         /* Small screen sidebar toggle */
-
         @media (max-width: 768px) {
-
             .sidebar {
-
                 transform: translateX(-100%);
-
                 transition: transform 0.3s ease-in-out;
-
             }
-
             .sidebar.open {
-
                 transform: translateX(0);
-
             }
-
         }
-
     </style>
 
-
-
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
     </head>
-
 <body class="h-full">
 
-
-
     <div id="login-screen" class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-
         <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-
             <h1 class="text-3xl font-bold text-center text-emerald-600">Fix YourCity</h1>
-
             <h2 class="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Authority Login</h2>
-
         </div>
-
-
-
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-
             <form class="space-y-6" id="login-form">
-
                 <div>
-
                     <label for="username" class="block text-sm font-medium leading-6 text-gray-900">Username</label>
-
                     <div class="mt-2">
-
                         <input id="username" name="username" type="text" required
-
                             class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6">
-
                     </div>
-
                 </div>
-
-
-
                 <div>
-
                     <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-
                     <div class="mt-2">
-
                         <input id="password" name="password" type="password" required
-
                             class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6">
-
                     </div>
-
                 </div>
-
-
-
                 <div id="error-message" class="hidden text-sm font-medium text-red-600">
-
                     Invalid username or password. Please try again.
-
                 </div>
-
-
-
                 <div>
-
                     <button type="submit"
-
                         class="flex w-full justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-
                         Sign in
-
                     </button>
-
                 </div>
-
             </form>
-
         </div>
-
     </div>
-
     <div class="min-h-full hidden" id="dashboard-content">
-
         <nav class="sidebar fixed inset-y-0 left-0 z-30 flex w-64 flex-col overflow-y-auto bg-emerald-500 px-6 pb-4 md:flex md:transform-none">
-
             <div class="flex h-16 shrink-0 items-center">
-
                 <h1 class="text-2xl font-bold text-white">Fix YourCity</h1>
-
             </div>
-
             <ul role="list" class="flex flex-1 flex-col gap-y-7">
-
                 <li>
-
                     <ul role="list" class="-mx-2 space-y-1">
-
                         <li>
-
                             <a href="#" class="sidebar-link active" data-filter="All Reports">
-
                                 <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.44 1.15-.44 1.59 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-
                                 </svg>
-
                                 Dashboard
-
                             </a>
-
                         </li>
-
                         <li>
-
                             <a href="#" class="sidebar-link" data-filter="High Priority">
-
                                 <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-
                                 </svg>
-
                                 High Priority
-
                             </a>
-
                         </li>
-
                         
-
                         <li>
-
                             <a href="#" class="sidebar-link" data-filter="Pending">
-
                                 <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-
                                 </svg>
-
                                 No Progress (Pending)
-
                             </a>
-
                         </li>
-
                         <li>
-
                             <a href="#" class="sidebar-link" data-filter="In Progress">
-
                                 <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-
                                 </svg>
-
                                 Active (In Progress)
-
                             </a>
-
                         </li>
-
                         <li>
-
                             <a href="#" class="sidebar-link" data-filter="Resolved">
-
                                 <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-
                                 </svg>
-
                                 Resolved
-
                             </a>
-
                         </li>
-
                         </ul>
-
                 </li>
-
                 <li>
-
                     <div class="text-xs font-semibold leading-6 text-emerald-100">Categories</div>
-
                     <ul role="list" class="-mx-2 mt-2 space-y-1" id="category-filters">
-
                         <li><a href="#" class="sidebar-link" data-filter="Potholes">Potholes</a></li>
-
                         <li><a href="#" class="sidebar-link" data-filter="Broken Streetlight">Broken Streetlight</a></li>
-
                         <li><a href="#" class="sidebar-link" data-filter="Garbage Overflow">Garbage Overflow</a></li>
-
                         <li><a href="#" class="sidebar-link" data-filter="Illegal Parking">Illegal Parking</a></li>
-
                         <li><a href="#" class="sidebar-link" data-filter="Public Nuisance">Public Nuisance</a></li>
-
                         <li><a href="#" class="sidebar-link" data-filter="Others">Others</a></li>
-
                     </ul>
-
                 </li>
-
             </ul>
-
         </nav>
 
-
-
         <div class="md:pl-64">
-
             <div class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-
                 <button type_button" class="text-gray-700 md:hidden" id="menu-toggle">
-
                     <span class="sr-only">Open sidebar</span>
-
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-
                     </svg>
-
                 </button>
-
                 <div class="flex-1 text-sm font-medium leading-6 text-gray-900" id="header-title">Dashboard</div>
-
                 
-
                 <div>
-
                     <button type="button" id="logout-button" class="rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">
-
                         Log out
-
                     </button>
-
                 </div>
-
                 </div>
-
-
 
             <main class="py-10">
-
                 <div class="px-4 sm:px-6 lg:px-8">
-
                     <h3 class="text-base font-semibold leading-6 text-gray-900">Key Statistics</h3>
-
                     <div class="mt-2 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-
                         <div class="overflow-hidden rounded-lg bg-white shadow">
-
                             <div class="p-5">
-
                                 <div class="flex items-center">
-
                                     <div class="flex-shrink-0">
-
                                         <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-
                                     </div>
-
                                     <div class="ml-5 w-0 flex-1">
-
                                         <dl>
-
                                             <dt class="truncate text-sm font-medium text-gray-500">Total Reports</dt>
-
                                             <dd class="text-3xl font-semibold tracking-tight text-gray-900" id="stat-total">0</dd>
-
                                         </dl>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                         <div class="overflow-hidden rounded-lg bg-white shadow">
-
                             <div class="p-5">
-
                                 <div class="flex items-center">
-
                                     <div class="flex-shrink-0">
-
                                         <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-
                                     </div>
-
                                     <div class="ml-5 w-0 flex-1">
-
                                         <dl>
-
                                             <dt class="truncate text-sm font-medium text-gray-500">Pending</dt>
-
                                             <dd class="text-3xl font-semibold tracking-tight text-gray-900" id="stat-pending">0</dd>
-
                                         </dl>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                         <div class="overflow-hidden rounded-lg bg-red-100 shadow">
-
                             <div class="p-5">
-
                                 <div class="flex items-center">
-
                                     <div class="flex-shrink-0">
-
                                         <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
-
                                     </div>
-
                                     <div class="ml-5 w-0 flex-1">
-
                                         <dl>
-
                                             <dt class="truncate text-sm font-medium text-red-700">High Priority</dt>
-
                                             <dd class="text-3xl font-semibold tracking-tight text-red-900" id="stat-priority">0</dd>
-
                                         </dl>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
-
 
                     <div class="mt-8">
-
                         <h2 class="text-xl font-semibold leading-6 text-gray-900" id="complaint-list-title">All Reports</h2>
-
                         <div class="mt-4 overflow-hidden rounded-lg bg-white shadow">
-
                             <div class="p-6 space-y-6" id="complaint-list">
-
                                 <div id="empty-state" class="text-center text-gray-500 py-10">
-
                                     <p>No reports found matching this filter.</p>
-
                                     <p class="text-sm mt-2">Try submitting a report on the user dashboard.</p>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </main>
-
         </div>
-
     </div>
-
     <script>
-
         document.addEventListener('DOMContentLoaded', () => {
 
-
-
-            // === ADDED FIREBASE CONFIG (STEP 2) ===
-
-            // PASTE YOUR "Magic Key" (firebaseConfig) HERE
-
+            // === UPDATED FIREBASE CONFIG (STEP 2) ===
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
             const firebaseConfig = {
-
-              // ...same exact key as before...
-
-              // (e.g., apiKey: "...", authDomain: "...", ...)
-
+              apiKey: "AIzaSyBKMqR9Gq_OzwPXFvKKF7E3xo6LknQ1iu4",
+              authDomain: "fixyourcity-165b4.firebaseapp.com",
+              projectId: "fixyourcity-165b4",
+              storageBucket: "fixyourcity-165b4.firebasestorage.app",
+              messagingSenderId: "803814194323",
+              appId: "1:803814194323:web:b9c44b707ff1bc2696a166",
+              measurementId: "G-SH58RM64ML"
             };
-
             
-
             // Connect to your Firebase project
-
             firebase.initializeApp(firebaseConfig);
-
             
-
             // Get a reference to the "Filing Cabinet" (Firestore)
-
             const db = firebase.firestore();
-
-            // === END ADDED FIREBASE CONFIG ===
-
-
-
+            
+            // Initialize Analytics (using compat style to match your scripts)
+            const analytics = firebase.analytics();
+            // === END UPDATED FIREBASE CONFIG ===
 
 
             // --- Main Page Elements ---
-
             const loginScreen = document.getElementById('login-screen');
-
             const dashboardContent = document.getElementById('dashboard-content');
-
             
-
             // --- Login/Logout Elements ---
-
             const loginForm = document.getElementById('login-form');
-
             const usernameInput = document.getElementById('username');
-
             const passwordInput = document.getElementById('password');
-
             const errorMessage = document.getElementById('error-message');
-
             const logoutButton = document.getElementById('logout-button');
 
-
-
             // --- Dashboard Variables & Elements ---
-
             // These will be defined *inside* initializeDashboard
-
             // to ensure they only run when the user is logged in.
-
             let allReports = [];
-
             let currentFilter = 'All Reports';
-
             let statTotalEl, statPendingEl, statPriorityEl, complaintListEl, emptyStateEl, headerTitleEl, complaintListTitleEl, sidebarLinks, categoryFiltersEl, menuToggle, sidebar;
 
-
-
             // ===================================
-
             // === ALL DASHBOARD FUNCTIONS     ===
-
             // ===================================
-
             // All your original functions are placed here,
-
             // so they are defined and ready to be used.
 
-
-
             /*
-
              * NOTE: loadAndRenderReports() and saveReports()
-
              * have been REMOVED. They are replaced by the
-
              * real-time Firebase listener below.
-
-            */
-
+             */
             
 
-
-
             /**
-
              * Checks if a report is "High Priority"
-
              * (Older than 5 days and still "Pending").
-
              */
-
             function isHighPriority(report) {
-
                 if (report.status !== 'Pending') {
-
                     return false;
-
                 }
-
                 
-
                 // Handle Firebase Timestamps vs. JS Dates
-
                 let reportDate;
-
                 if (report.date && typeof report.date.toDate === 'function') {
-
                     reportDate = report.date.toDate(); // Convert Firebase Timestamp to JS Date
-
                 } else {
-
                     reportDate = new Date(report.date); // Fallback for JS Date string
-
                 }
-
-
 
                 const now = new Date();
-
                 const diffTime = Math.abs(now - reportDate);
-
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
                 return diffDays > 5;
-
             }
 
-
-
             /**
-
              * Updates the top statistic cards.
-
              */
-
             function updateStatistics() {
-
                 const total = allReports.length;
-
                 const pending = allReports.filter(r => r.status === 'Pending').length;
-
                 const priority = allReports.filter(isHighPriority).length;
 
-
-
                 statTotalEl.textContent = total;
-
                 statPendingEl.textContent = pending;
-
                 statPriorityEl.textContent = priority;
-
             }
 
-
-
             /**
-
              * Renders the list of complaint cards based on the current filter.
-
              */
-
             function renderComplaintList() {
-
                 // Clear the list
-
                 complaintListEl.innerHTML = '';
 
-
-
                 // Get filtered reports
-
                 let filteredReports = [];
-
                 
-
                 // === MODIFIED/ADDED LOGIC START ===
-
                 if (currentFilter === 'All Reports') {
-
                     filteredReports = allReports;
-
                 } else if (currentFilter === 'High Priority') {
-
                     filteredReports = allReports.filter(isHighPriority);
-
                 } else if (currentFilter === 'Pending' || currentFilter === 'In Progress' || currentFilter === 'Resolved') {
-
                     // Status filter
-
                     filteredReports = allReports.filter(r => r.status === currentFilter);
-
                 } else {
-
                 // === MODIFIED/ADDED LOGIC END ===
-
                     // Category filter
-
                     filteredReports = allReports.filter(r => r.type === currentFilter);
-
                 }
 
-
-
                 // Sort by date, newest first
-
                 filteredReports.sort((a, b) => {
-
                     const dateA = a.date && typeof a.date.toDate === 'function' ? a.date.toDate() : new Date(a.date);
-
                     const dateB = b.date && typeof b.date.toDate === 'function' ? b.date.toDate() : new Date(b.date);
-
                     return dateB - dateA;
-
                 });
-
-
-
 
 
                 // Display empty state or render cards
-
                 if (filteredReports.length === 0) {
-
                     complaintListEl.appendChild(emptyStateEl);
-
                 } else {
-
                     filteredReports.forEach(report => {
-
                         const card = createComplaintCard(report);
-
                         complaintListEl.appendChild(card);
-
                     });
-
                 }
-
             }
-
-
 
             /**
-
              * Creates a single HTML element for a complaint card.
-
              */
-
             function createComplaintCard(report) {
-
                 const card = document.createElement('div');
-
                 card.className = 'p-6 border-b border-gray-200 last:border-b-0';
-
                 
-
                 const highPriority = isHighPriority(report);
-
                 
-
                 // Handle Firebase Timestamps vs. JS Dates
-
                 let reportDate;
-
                 if (report.date && typeof report.date.toDate === 'function') {
-
                     reportDate = report.date.toDate(); // Convert Firebase Timestamp
-
                 } else {
-
                     reportDate = new Date(report.date); // Fallback
-
                 }
-
-
 
                 const formattedDate = reportDate.toLocaleDateString('en-US', {
-
                     year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-
                 });
 
-
-
                 let statusBadge = '';
-
                 if (report.status === 'Pending') {
-
                     statusBadge = `<span class="inline-flex items-center rounded-md bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">Pending</span>`;
-
                 } else if (report.status === 'In Progress') {
-
                     statusBadge = `<span class="inline-flex items-center rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">In Progress</span>`;
-
                 } else if (report.status === 'Resolved') {
-
                     statusBadge = `<span class="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-800">Resolved</span>`;
-
                 }
 
-
-
                 // === Added image display from instructions ===
-
                 const imageElement = report.imageUrl 
-
                     ? `<img src="${report.imageUrl}" alt="Evidence" style="width: 200px; margin-top: 10px; border-radius: 8px;">`
-
                     : '';
 
-
-
                 card.innerHTML = `
-
                     <div class="flex items-center justify-between">
-
                         <div class="flex items-center gap-x-3">
-
                             <span class="font-semibold text-gray-800">${report.type}</span>
-
                             ${statusBadge}
-
                             ${highPriority ? `<span class="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-800 shadow-sm">HIGH PRIORITY</span>` : ''}
-
                         </div>
-
                         <div class="text-sm text-gray-500">
-
                             Reported on: ${formattedDate}
-
                         </div>
-
                     </div>
-
                     
-
                     <p class="mt-4 text-gray-700">${report.description || 'No description provided.'}</p>
-
                     
-
                     ${imageElement}
-
                     
-
                     <div class="mt-4 flex items-center justify-between">
-
                         <div class="text-sm text-gray-600">
-
                             <p><strong>Location:</strong> ${report.location || 'Not specified'}</p>
-
                             <p class="mt-1"><strong>Citizen ID:</strong> <span class="font-mono text-xs">${report.userId || 'anonymous'}</span></p>
-
                         </div>
-
                         
-
                         <div class="flex-shrink-0 space-x-2">
-
                             ${report.status === 'Pending' ? `
-
                                 <button data-id="${report.id}" data-status="In Progress" class="status-btn rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-
                                     Mark In Progress
-
                                 </button>` 
-
                             : ''}
-
                             ${report.status === 'In Progress' || report.status === 'Pending' ? `
-
                                 <button data-id="${report.id}" data-status="Resolved" class="status-btn rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
-
                                     Mark Resolved
-
                                 </button>` 
-
                             : ''}
-
                         </div>
-
                     </div>
-
                 `;
-
                 return card;
-
             }
-
-
 
             // --- Dashboard Event Handlers ---
 
-
-
             /**
-
              * Handles clicks on the sidebar filter links.
-
              */
-
             function handleFilterClick(e) {
-
                 e.preventDefault();
-
                 const target = e.currentTarget;
-
                 currentFilter = target.dataset.filter;
 
-
-
                 // Update header titles
-
                 let title = currentFilter;
-
                 if (currentFilter === 'All Reports') {
-
                     title = 'Dashboard';
-
                 } else if (currentFilter === 'Pending') {
-
                     title = 'No Progress (Pending)';
-
                 } else if (currentFilter === 'In Progress') {
-
                     title = 'Active (In Progress)';
-
                 }
-
                 
-
                 headerTitleEl.textContent = title;
-
                 complaintListTitleEl.textContent = `${title} Reports`;
 
-
-
                 // Update active link
-
                 sidebarLinks.forEach(link => link.classList.remove('active'));
-
                 target.classList.add('active');
 
-
-
                 // Re-render the list
-
                 renderComplaintList();
-
                 
-
                 // Close sidebar on mobile after clicking a link
-
                 if (window.innerWidth < 768) {
-
                     sidebar.classList.remove('open');
-
                 }
-
             }
 
-
-
             /**
-
              * Handles clicks on the "Mark In Progress" or "Mark Resolved" buttons.
-
              * (MODIFIED TO USE FIREBASE)
-
              */
-
             function handleStatusChange(e) {
-
                 if (!e.target.classList.contains('status-btn')) {
-
                     return; // Not a status button
-
                 }
-
-
 
                 const reportId = e.target.dataset.id;
-
                 const newStatus = e.target.dataset.status;
 
-
-
                 // === MODIFIED: UPDATE FIREBASE ===
-
                 // Get a reference to the specific document
-
                 const reportRef = db.collection("issues").doc(reportId);
 
-
-
                 // Update the "status" field in Firestore
-
                 reportRef.update({
-
                     status: newStatus
-
                 })
-
                 .then(() => {
-
                     console.log(`Report ${reportId} status updated to ${newStatus} in Firebase.`);
-
                     // No need to refresh manually.
-
                     // The 'onSnapshot' listener in initializeDashboard
-
                     // will automatically detect this change and update the UI.
-
                 })
-
                 .catch((error) => {
-
                     console.error("Error updating report status: ", error);
-
                 });
-
                 // === END MODIFICATION ===
-
             }
-
-
 
             /*
-
              * NOTE: handleStorageChange() was REMOVED as it is
-
              * no longer needed with the Firebase real-time listener.
-
-            */
-
+             */
             
 
-
-
             // ===================================
-
             // === NEW LOGIN & STATE CONTROL   ===
-
             // ===================================
-
-
 
             /**
-
              * This function runs *after* login is confirmed.
-
              * It finds all the dashboard elements and attaches all the
-
              * event listeners for the dashboard to work.
-
              * (MODIFIED TO INITIALIZE FIREBASE)
-
              */
-
             function initializeDashboard() {
-
                 // Find all dashboard elements
-
                 statTotalEl = document.getElementById('stat-total');
-
                 statPendingEl = document.getElementById('stat-pending');
-
                 statPriorityEl = document.getElementById('stat-priority');
-
                 complaintListEl = document.getElementById('complaint-list');
-
                 emptyStateEl = document.getElementById('empty-state');
-
                 headerTitleEl = document.getElementById('header-title');
-
                 complaintListTitleEl = document.getElementById('complaint-list-title');
-
                 sidebarLinks = document.querySelectorAll('.sidebar-link');
-
                 categoryFiltersEl = document.getElementById('category-filters');
-
                 menuToggle = document.getElementById('menu-toggle');
-
                 sidebar = document.querySelector('.sidebar');
-
                 
-
                 // --- Attach Dashboard Event Listeners ---
-
                 menuToggle.addEventListener('click', () => {
-
                     sidebar.classList.toggle('open');
-
                 });
-
                 
-
                 sidebarLinks.forEach(link => link.addEventListener('click', handleFilterClick));
-
                 complaintListEl.addEventListener('click', handleStatusChange);
-
                 // The 'storage' listener was removed, as Firebase handles real-time updates.
 
-
-
                 // === ADDED FIREBASE REAL-TIME LISTENER (STEP 3) ===
-
                 // Watch the "issues" collection in real-time
-
                 db.collection("issues").onSnapshot(
+                    (snapshot) => {
+                        console.log("Firebase snapshot received, updating dashboard...");
+                        
+                        // Clear the global state array
+                        allReports = []; 
 
-                  (snapshot) => {
+                        // Loop through every single report ("letter") in the database
+                        snapshot.forEach((doc) => {
+                            // Get the data from the "letter"
+                            const report = doc.data();
+                            // IMPORTANT: Add the document ID to the object
+                            // so our handleStatusChange function can find it.
+                            report.id = doc.id; 
+                            
+                            allReports.push(report);
+                        });
 
-                    console.log("Firebase snapshot received, updating dashboard...");
-
-                    
-
-                    // Clear the global state array
-
-                    allReports = []; 
-
-
-
-                    // Loop through every single report ("letter") in the database
-
-                    snapshot.forEach((doc) => {
-
-                      // Get the data from the "letter"
-
-                      const report = doc.data();
-
-                      // IMPORTANT: Add the document ID to the object
-
-                      // so our handleStatusChange function can find it.
-
-                      report.id = doc.id; 
-
-                      
-
-                      allReports.push(report);
-
-                    });
-
-
-
-                    // Now that allReports is updated,
-
-                    // call the existing functions to update the UI.
-
-                    updateStatistics();
-
-                    renderComplaintList();
-
-                  },
-
-                  (error) => {
-
-                    console.error("Error getting reports: ", error);
-
-                  }
-
+                        // Now that allReports is updated,
+                        // call the existing functions to update the UI.
+                        updateStatistics();
+                        renderComplaintList();
+                    },
+                    (error) => {
+                        console.error("Error getting reports: ", error);
+                    }
                 );
-
                 // === END ADDED FIREBASE LISTENER ===
 
-
-
                 // The initial call to loadAndRenderReports() was removed
-
                 // because the onSnapshot listener runs immediately on load.
-
             }
-
-
 
             /**
-
              * Checks sessionStorage to see if user is logged in.
-
              * Shows/hides the correct page section.
-
              */
-
             function checkLoginState() {
-
                 if (sessionStorage.getItem('isAuthorityLoggedIn') === 'true') {
-
                     // Logged in: Show dashboard, hide login
-
                     dashboardContent.classList.remove('hidden');
-
                     loginScreen.classList.add('hidden');
-
                     
-
                     // Run the dashboard's setup code
-
                     initializeDashboard();
-
                 } else {
-
                     // Logged out: Show login, hide dashboard
-
                     dashboardContent.classList.add('hidden');
-
                     loginScreen.classList.remove('hidden');
-
                 }
-
             }
-
-
 
             // --- Attach Login/Logout Handlers ---
 
-
-
             loginForm.addEventListener('submit', (e) => {
-
                 e.preventDefault();
-
                 const username = usernameInput.value;
-
                 const password = passwordInput.value;
 
-
-
                 // --- Hardcoded Credentials (FOR DEMO ONLY) ---
-
                 if (username === 'authority' && password === 'pass123') {
-
                     // Success:
-
                     errorMessage.classList.add('hidden');
-
                     sessionStorage.setItem('isAuthorityLoggedIn', 'true');
-
                     checkLoginState(); // Re-run check to show dashboard
-
                 } else {
-
                     // Failure:
-
                     errorMessage.classList.remove('hidden');
-
                 }
-
             });
-
-
 
             logoutButton.addEventListener('click', () => {
-
                 sessionStorage.removeItem('isAuthorityLoggedIn');
-
                 checkLoginState(); // Re-run check to show login screen
-
             });
 
-
-
             // --- Initial Page Load ---
-
             // Check the login state as soon as the page loads.
-
             checkLoginState();
 
-
-
         });
-
     </script>
-
 </body>
-
 </html>
